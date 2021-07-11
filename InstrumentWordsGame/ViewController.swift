@@ -16,14 +16,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var labelPopupTitle: UILabel!
     @IBOutlet weak var labelPopupContent: UILabel!
     @IBOutlet weak var button_ok: UIButton! // use to close the whole screen to main menu
-    let USERWIN = 1, USERLOSE = 2
+    let USERWIN = 1, USERLOSE = 2 // display state for popup view
     
-    // declaration to hide initial user view
+    // declaration to hide initial user view when showing popup view
     @IBOutlet weak var visualEffectView: UIVisualEffectView!
     
     // declaration of intial user view
     @IBOutlet weak var labelCounter: UILabel! // display the number of the instrument viewing
     @IBOutlet weak var labelLifeCounter: UILabel! // display the life left of the game
+    @IBOutlet weak var labelHelpCounter: UILabel!
     @IBOutlet weak var imageInstrument: UIImageView!
     @IBOutlet weak var textFieldbyUser: UITextField!
     let bottomLine = CALayer()
@@ -36,7 +37,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     var instrumentlist: [instrument] = []
     var startindex = 0 // strat index for the instrument to be shown
-    var lifeCount = 3
+    var lifeCount = 3, helpCount = 3
     
     // Create instrument and store in the list
     func createArray () -> [instrument] {
@@ -119,25 +120,45 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
     }
     
-    @IBAction func button_done(_ sender: UIButton) {
-        done_enter_pressed()
+    
+    @IBOutlet weak var button_help: UIButton!
+    @IBAction func button_help(_ sender: UIButton) {
+        resetBottomLine_label()  // change back bottom line to grey color and no label shown
+        helpCount-=1
+        labelHelpCounter.text="X \(helpCount)"
+        textFieldbyUser.text = instrumentlist[startindex].name
+        
+        if(helpCount==0){
+            button_help.isEnabled = false
+        }
+        
     }
     
+    // when button done is pressed
+    @IBAction func button_done(_ sender: UIButton) {
+        validateUserInput()
+    }
+    
+    // when return or enter is pressed
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        done_enter_pressed()
+        validateUserInput()
         textField.resignFirstResponder() //this code will hide the keyboard if enter pressed
         return true
     }
     
     func textField(_ textField: UITextField,shouldChangeCharactersIn range: NSRange,replacementString string: String) -> Bool {
-        // change back to grey color when user typing
-        labelIncorrectAns.text = "*Incorrect Answer"
-        bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
-        labelIncorrectAns.isHidden = true
+        resetBottomLine_label() // change back to grey color when user typing and no label shown
         return true
     }
     
-    func done_enter_pressed(){
+    // change back bottom line to grey color and no label shown
+    func resetBottomLine_label(){
+        labelIncorrectAns.text = "*Incorrect Answer"
+        bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
+        labelIncorrectAns.isHidden = true
+    }
+    
+    func validateUserInput(){
         // to avoid empty and space string deduct the life
         if(textFieldbyUser.text!.trimmingCharacters(in: .whitespaces).isEmpty){
             labelIncorrectAns.text = "*Plase key in some words"
@@ -158,7 +179,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 lifeCount-=1
                 labelLifeCounter.text = "X \(lifeCount)"
                 labelIncorrectAns.isHidden = false
-                bottomLine.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 1).cgColor
+                bottomLine.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 1).cgColor //make the line red color
                 if(lifeCount<1){
                     animatePopUp(USERLOSE)
                 }
@@ -168,7 +189,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     // DIY popup menu
     func animatePopUp(_ userResult:Int){
-        
         if(userResult==USERWIN){
             labelPopupTitle.text = "Congratulation!"
             labelPopupContent.text = "You have won the game."
