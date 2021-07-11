@@ -28,7 +28,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var imageInstrument: UIImageView!
     @IBOutlet weak var textFieldbyUser: UITextField!
     let bottomLine = CALayer()
-    @IBOutlet weak var labelIncorrectAns: UILabel!
+    @IBOutlet weak var labelDisplayMessage: UILabel!
+    let DEFAULTSTATE = 0, CORRECTANS = 1, INCORRECTANS = 2, SHOWANS = 3, EMPTYSTRING = 4
+    @IBOutlet weak var button_Done: UIButton!
+    @IBOutlet weak var button_Next: UIButton!
     
     // Define the paramters of the instrument
     struct instrument {
@@ -37,7 +40,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     var instrumentlist: [instrument] = []
     var startindex = 0 // strat index for the instrument to be shown
-    var lifeCount = 3, helpCount = 3
+    var lifeCount = 3, helpCount = 3, correctCount = 0
     
     // Create instrument and store in the list
     func createArray () -> [instrument] {
@@ -95,7 +98,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         visualEffectView.isHidden = true //hide the effect ensure behind can be clicked
         button_ok.layer.borderColor = UIColor.white.cgColor // popup ok buttong effect
         addUnderlineLinetoTextField()
-        
         self.textFieldbyUser.delegate = self
         
         // initialise the instruments
@@ -103,6 +105,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         setImage()
     }
     
+    // UI design draw the text field with no border but a line
     func addUnderlineLinetoTextField(){
         bottomLine.frame = CGRect(x: 0, y: textFieldbyUser.frame.height-2, width: textFieldbyUser.frame.width, height: 1)
         bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
@@ -111,19 +114,30 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     func setImage(){
-        labelIncorrectAns.isHidden = true
+        button_Next.isHidden = true
+        button_Done.isEnabled = true
+        setBottomLine_label_color(DEFAULTSTATE)
+        textFieldbyUser.isEnabled = true
         textFieldbyUser.text=""
         lifeCount = 3 //reset the life count every image have three chances
+        if(helpCount>0){
+            button_help.isEnabled = true
+        }
         labelLifeCounter.text = "X \(lifeCount)"
         imageInstrument.image = (UIImage(named: instrumentlist[startindex].image)!)
         labelCounter.text = "\(String(startindex+1))/\(instrumentlist.count)"
         
     }
     
+    // only set the image when next is pressed
+    @IBAction func button_next(_ sender: UIButton) {
+        setImage()
+    }
     
+    // this will show the ans to user
     @IBOutlet weak var button_help: UIButton!
     @IBAction func button_help(_ sender: UIButton) {
-        resetBottomLine_label()  // change back bottom line to grey color and no label shown
+        setBottomLine_label_color(DEFAULTSTATE)  // change back bottom line to grey color and no label shown
         helpCount-=1
         labelHelpCounter.text="X \(helpCount)"
         textFieldbyUser.text = instrumentlist[startindex].name
@@ -131,7 +145,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         if(helpCount==0){
             button_help.isEnabled = false
         }
-        
     }
     
     // when button done is pressed
@@ -147,56 +160,99 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textField(_ textField: UITextField,shouldChangeCharactersIn range: NSRange,replacementString string: String) -> Bool {
-        resetBottomLine_label() // change back to grey color when user typing and no label shown
+        setBottomLine_label_color(DEFAULTSTATE) // change back to grey color when user typing and no label shown
         return true
     }
     
     // change back bottom line to grey color and no label shown
-    func resetBottomLine_label(){
-        labelIncorrectAns.text = "*Incorrect Answer"
-        bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
-        labelIncorrectAns.isHidden = true
+    func setBottomLine_label_color(_ colorType:Int){
+        // number 1 -> default state
+        // number 2 -> wrong answer
+        // number 3 -> correct answer
+        switch colorType {
+        case CORRECTANS:
+            labelDisplayMessage.text = "* Your answer is correct! You have \(correctCount) correct now!"
+            bottomLine.backgroundColor = UIColor.init(red: 0/255, green: 255/255, blue: 0/255, alpha: 1).cgColor
+            labelDisplayMessage.textColor = UIColor.init(red: 0/255, green: 255/255, blue: 0/255, alpha: 1)
+            labelDisplayMessage.isHidden = false
+            textFieldbyUser.isEnabled = false
+            button_help.isEnabled = false
+            button_Done.isEnabled = false
+            button_Next.isHidden = false
+        case INCORRECTANS:
+            labelDisplayMessage.text = "* Incorrect Answer"
+            bottomLine.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 1).cgColor //make the line red color
+            labelDisplayMessage.textColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)
+            labelDisplayMessage.isHidden = false
+        case SHOWANS:
+            labelDisplayMessage.text = "* The correct answer is \(instrumentlist[startindex].name)."
+            bottomLine.backgroundColor = UIColor.init(red: 188/255, green: 138/255, blue: 13/255, alpha: 1).cgColor //make the line red color
+            labelDisplayMessage.textColor = UIColor.init(red: 188/255, green: 138/255, blue: 13/255, alpha: 1)
+            labelDisplayMessage.isHidden = false
+            textFieldbyUser.isEnabled = false
+            button_help.isEnabled = false
+            button_Done.isEnabled = false
+            button_Next.isHidden = false
+        case EMPTYSTRING:
+            labelDisplayMessage.text = "* Plase key in some words"
+            bottomLine.backgroundColor = UIColor.init(red: 195/255, green: 140/255, blue: 130/255, alpha: 1).cgColor //make the line red color
+            labelDisplayMessage.textColor = UIColor.init(red: 195/255, green: 140/255, blue: 130/255, alpha: 1)
+            labelDisplayMessage.isHidden = false
+        default:
+            bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
+            labelDisplayMessage.isHidden = true
+            
+        }
     }
     
     func validateUserInput(){
         // to avoid empty and space string deduct the life
         if(textFieldbyUser.text!.trimmingCharacters(in: .whitespaces).isEmpty){
-            labelIncorrectAns.text = "*Plase key in some words"
-            labelIncorrectAns.isHidden = false
+            setBottomLine_label_color(EMPTYSTRING)
         }
         else{
+            // correct answer
             if(textFieldbyUser.text?.lowercased().trimmingCharacters(in: .whitespaces)==instrumentlist[startindex].name.lowercased()){
-                if(startindex+1==instrumentlist.count){
-                    animatePopUp(USERWIN)
-                }
-                else{
-                    startindex+=1
-                    setImage()
-                }
-                
+                correctCount+=1
+                setBottomLine_label_color(CORRECTANS)
+                validateLastInput()
             }
+            // wrong answer
             else{
                 lifeCount-=1
                 labelLifeCounter.text = "X \(lifeCount)"
-                labelIncorrectAns.isHidden = false
-                bottomLine.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 1).cgColor //make the line red color
-                if(lifeCount<1){
-                    animatePopUp(USERLOSE)
+                if(lifeCount>0){setBottomLine_label_color(INCORRECTANS)}
+                else {
+                    setBottomLine_label_color(SHOWANS)
+                    validateLastInput()
                 }
+                
             }
         }
     }
+    func validateLastInput(){
+        if(startindex+1==instrumentlist.count){
+            button_Next.isHidden = true // hide the next button if last question
+            let passGrade = (instrumentlist.count%2==1 ? (instrumentlist.count/2)+1 : instrumentlist.count/2)
+            if(correctCount>=passGrade) {animatePopUp(USERWIN)}
+            else {animatePopUp(USERLOSE)}
+        }
+        else{
+            startindex+=1
+        }
+    }
+    
     
     // DIY popup menu
     func animatePopUp(_ userResult:Int){
         if(userResult==USERWIN){
             labelPopupTitle.text = "Congratulation!"
-            labelPopupContent.text = "You have won the game."
+            labelPopupContent.text = "You have achieved a score of \(correctCount)/\(instrumentlist.count) ."
             popUpImageView.image = (UIImage(named:"win"))
         }
         else{
             labelPopupTitle.text = "Oh nooo..."
-            labelPopupContent.text = "You have run out of life."
+            labelPopupContent.text = "You only have a score of \(correctCount)/\(instrumentlist.count)."
             popUpImageView.image = (UIImage(named:"lose"))
         }
         
