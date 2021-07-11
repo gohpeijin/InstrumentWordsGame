@@ -26,8 +26,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var labelLifeCounter: UILabel! // display the life left of the game
     @IBOutlet weak var imageInstrument: UIImageView!
     @IBOutlet weak var textFieldbyUser: UITextField!
-    
-    //    var effect: UIVisualEffect!
+    let bottomLine = CALayer()
+    @IBOutlet weak var labelIncorrectAns: UILabel!
     
     // Define the paramters of the instrument
     struct instrument {
@@ -44,29 +44,45 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         let instrument1 = instrument(name: "Triangle", image: "triangle")
         let instrument2 = instrument(name: "Guitar", image: "guitar")
-        //        let instrument3 = instrument(name: "Keyboard Piano", image: "keyboard_piano")
-        //        let instrument4 = instrument(name: "Bongos", image: "bongos")
-        //        let instrument5 = instrument(name: "Violin", image: "violin")
-        //        let instrument6 = instrument(name: "Saxophone", image: "saxophone")
-        //        let instrument7 = instrument(name: "Keytar", image: "keytar")
-        //        let instrument8 = instrument(name: "Harp" ,image: "harp")
-        //        let instrument9 = instrument(name: "Grand Piano",image: "grand-piano")
-        //        let instrument10 = instrument(name: "Trumpet", image: "trumpet")
-        //        let instrument11 = instrument(name: "Drum Set", image: "drum-set")
-        //        let instrument12 = instrument(name: "Clarinet", image: "clarinet")
+        let instrument3 = instrument(name: "Keyboard", image: "keyboard")
+        let instrument4 = instrument(name: "Bongos", image: "bongos")
+        let instrument5 = instrument(name: "Violin", image: "violin")
+        let instrument6 = instrument(name: "Saxophone", image: "saxophone")
+        let instrument7 = instrument(name: "Keytar", image: "keytar")
+        let instrument8 = instrument(name: "Harp" ,image: "harp")
+        let instrument9 = instrument(name: "Piano",image: "piano")
+        let instrument10 = instrument(name: "Trumpet", image: "trumpet")
+        let instrument11 = instrument(name: "Drum Set", image: "drum-set")
+        let instrument12 = instrument(name: "Clarinet", image: "clarinet")
+        let instrument13 = instrument(name: "Accordion", image: "accordion")
+        let instrument14 = instrument(name: "Bass", image: "bass")
+        let instrument15 = instrument(name: "Chime", image: "chime")
+        let instrument16 = instrument(name: "Cymbals", image: "cymbals")
+        let instrument17 = instrument(name: "Horn", image: "horn")
+        let instrument18 = instrument(name: "Maracas", image: "maracas")
+        let instrument19 = instrument(name: "Trombone", image: "trombone")
+        let instrument20 = instrument(name: "Xylophone", image: "xylophone")
         
         tempInstrument.append(instrument1)
         tempInstrument.append(instrument2)
-        //        tempInstrument.append(instrument3)
-        //        tempInstrument.append(instrument4)
-        //        tempInstrument.append(instrument5)
-        //        tempInstrument.append(instrument6)
-        //        tempInstrument.append(instrument7)
-        //        tempInstrument.append(instrument8)
-        //        tempInstrument.append(instrument9)
-        //        tempInstrument.append(instrument10)
-        //        tempInstrument.append(instrument11)
-        //        tempInstrument.append(instrument12)
+        tempInstrument.append(instrument3)
+        tempInstrument.append(instrument4)
+        tempInstrument.append(instrument5)
+        tempInstrument.append(instrument6)
+        tempInstrument.append(instrument7)
+        tempInstrument.append(instrument8)
+        tempInstrument.append(instrument9)
+        tempInstrument.append(instrument10)
+        tempInstrument.append(instrument11)
+        tempInstrument.append(instrument12)
+        tempInstrument.append(instrument13)
+        tempInstrument.append(instrument14)
+        tempInstrument.append(instrument15)
+        tempInstrument.append(instrument16)
+        tempInstrument.append(instrument17)
+        tempInstrument.append(instrument18)
+        tempInstrument.append(instrument19)
+        tempInstrument.append(instrument20)
         
         tempInstrument.shuffle()
         return tempInstrument
@@ -74,27 +90,27 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // UI design
         visualEffectView.isHidden = true //hide the effect ensure behind can be clicked
         button_ok.layer.borderColor = UIColor.white.cgColor // popup ok buttong effect
-        //        textFieldbyUser.borderStyle = .roundedRect
         addUnderlineLinetoTextField()
         
-        instrumentlist = createArray()
-        
         self.textFieldbyUser.delegate = self
-        setImage()
         
+        // initialise the instruments
+        instrumentlist = createArray()
+        setImage()
     }
     
     func addUnderlineLinetoTextField(){
-        let bottomLine = CALayer()
-        bottomLine.frame = CGRect(x: 0, y: textFieldbyUser.frame.height-2, width: textFieldbyUser.frame.width, height: 2)
+        bottomLine.frame = CGRect(x: 0, y: textFieldbyUser.frame.height-2, width: textFieldbyUser.frame.width, height: 1)
         bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
         textFieldbyUser.borderStyle = .none
         textFieldbyUser.layer.addSublayer(bottomLine)
     }
     
     func setImage(){
+        labelIncorrectAns.isHidden = true
         textFieldbyUser.text=""
         lifeCount = 3 //reset the life count every image have three chances
         labelLifeCounter.text = "X \(lifeCount)"
@@ -113,23 +129,39 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return true
     }
     
+    func textField(_ textField: UITextField,shouldChangeCharactersIn range: NSRange,replacementString string: String) -> Bool {
+        // change back to grey color when user typing
+        labelIncorrectAns.text = "*Incorrect Answer"
+        bottomLine.backgroundColor = UIColor.init(red: 214/255, green: 214/255, blue: 214/255, alpha: 1).cgColor
+        labelIncorrectAns.isHidden = true
+        return true
+    }
+    
     func done_enter_pressed(){
-        
-        if(textFieldbyUser.text?.lowercased().trimmingCharacters(in: .whitespaces)==instrumentlist[startindex].name.lowercased()){
-            if(startindex+1==instrumentlist.count){
-                animatePopUp(USERWIN)
-            }
-            else{
-                startindex+=1
-                setImage()
-            }
-            
+        // to avoid empty and space string deduct the life
+        if(textFieldbyUser.text!.trimmingCharacters(in: .whitespaces).isEmpty){
+            labelIncorrectAns.text = "*Plase key in some words"
+            labelIncorrectAns.isHidden = false
         }
         else{
-            lifeCount-=1
-            labelLifeCounter.text = "X \(lifeCount)"
-            if(lifeCount<1){
-                animatePopUp(USERLOSE)
+            if(textFieldbyUser.text?.lowercased().trimmingCharacters(in: .whitespaces)==instrumentlist[startindex].name.lowercased()){
+                if(startindex+1==instrumentlist.count){
+                    animatePopUp(USERWIN)
+                }
+                else{
+                    startindex+=1
+                    setImage()
+                }
+                
+            }
+            else{
+                lifeCount-=1
+                labelLifeCounter.text = "X \(lifeCount)"
+                labelIncorrectAns.isHidden = false
+                bottomLine.backgroundColor = UIColor.init(red: 255/255, green: 0/255, blue: 0/255, alpha: 1).cgColor
+                if(lifeCount<1){
+                    animatePopUp(USERLOSE)
+                }
             }
         }
     }
