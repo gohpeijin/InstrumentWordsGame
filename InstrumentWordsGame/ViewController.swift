@@ -164,7 +164,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return true
     }
     
-    // change back bottom line to grey color and no label shown
+    // change bottom line color and label shown
     func setBottomLine_label_color(_ colorType:Int){
         switch colorType {
         case CORRECTANS:
