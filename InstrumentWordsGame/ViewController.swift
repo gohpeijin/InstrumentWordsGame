@@ -166,9 +166,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     // change back bottom line to grey color and no label shown
     func setBottomLine_label_color(_ colorType:Int){
-        // number 1 -> default state
-        // number 2 -> wrong answer
-        // number 3 -> correct answer
         switch colorType {
         case CORRECTANS:
             labelDisplayMessage.text = "* Your answer is correct! You have \(correctCount) correct now!"
