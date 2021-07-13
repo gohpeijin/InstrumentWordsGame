@@ -29,7 +29,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var textFieldbyUser: UITextField!
     let bottomLine = CALayer()
     @IBOutlet weak var labelDisplayMessage: UILabel!
-    let DEFAULTSTATE = 0, CORRECTANS = 1, INCORRECTANS = 2, SHOWANS = 3, EMPTYSTRING = 4
+    let DEFAULTSTATE = 0, CORRECTANS = 1, INCORRECTANS = 2, SHOWANS = 3, EMPTYSTRING = 4 // use to cahnge the color for the --> labelDisplayMessage and the textfield line color
     @IBOutlet weak var button_Done: UIButton!
     @IBOutlet weak var button_Next: UIButton!
     
@@ -96,7 +96,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         // UI design
         visualEffectView.isHidden = true //hide the effect ensure behind can be clicked
-        button_ok.layer.borderColor = UIColor.white.cgColor // popup ok buttong effect
+        button_ok.layer.borderColor = UIColor.white.cgColor // popup ok button effect
         addUnderlineLinetoTextField()
         self.textFieldbyUser.delegate = self
         
